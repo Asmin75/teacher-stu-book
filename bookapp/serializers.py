@@ -26,6 +26,12 @@ class RegistrationSerializer(serializers.ModelSerializer):
         #     user.save()
 
 
+class BookSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+
+    class Meta:
+        model = Book
+        fields = ('name', 'content', 'owner')
 
 
 

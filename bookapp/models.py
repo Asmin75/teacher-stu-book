@@ -26,4 +26,4 @@ class Book(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.name, self.group
+        return self.name, self.owner

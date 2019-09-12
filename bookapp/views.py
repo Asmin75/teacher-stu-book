@@ -2,8 +2,9 @@ from django.contrib.auth import authenticate
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
-
+from rest_framework import generics,permissions
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
@@ -13,8 +14,9 @@ from rest_framework.status import(
     HTTP_200_OK
 )
 
-from bookapp.models import User
-from bookapp.serializers import RegistrationSerializer
+from bookapp.models import User, Book
+from bookapp.permissions import IsOwnerOrReadonly, IsAllowedToReadOrFetch
+from bookapp.serializers import RegistrationSerializer, BookSerializer
 
 
 @permission_classes((AllowAny,))
@@ -59,3 +61,21 @@ def login(request):
         return Response({"error":"Invalid Credentials"}, status=HTTP_404_NOT_FOUND)
     token, _ = Token.objects.get_or_create(user=user)
     return Response({"token": token.key}, status=HTTP_200_OK)
+
+
+class BookListview(generics.ListCreateAPIView):
+    book = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+
+class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Book.objects.all()
+    user = User.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadonly, IsAllowedToReadOrFetch,)
+
+
