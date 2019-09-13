@@ -64,7 +64,7 @@ def login(request):
 
 
 class BookListview(generics.ListCreateAPIView):
-    book = Book.objects.all()
+    queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
